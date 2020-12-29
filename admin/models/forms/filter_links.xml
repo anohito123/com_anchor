@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+	<fields name="filter">
+		<field
+			name="search"
+			type="text"
+			inputmode="search"
+			label="COM_REDIRECT1_FILTER_SEARCH_LABEL"
+			description="若使用“字段名:内容”的方式便会进行精准查询。如：“keyword:minitool”。可供精准查询的字段：anchor_id、keyword、new_keyword、remark"
+
+			hint="JSEARCH_FILTER"
+		/>
+		<field
+			name="state"
+			type="redirect_status"
+			label="COM_REDIRECT_FILTER_PUBLISHED"
+
+			onchange="this.form.submit();"
+			>
+			<option value="">JOPTION_SELECT_PUBLISHED</option>
+		</field>
+
+		<field
+				name="match_state"
+				type="list"
+				label="JSTATUS"
+				description="JFIELD_PUBLISHED_DESC"
+				size="1"
+				default="-1"
+				onchange="this.form.submit();"
+		>
+			<option value="-1">-匹配状态(全部)-</option>
+			<option value="0">未匹配</option>
+			<option value="1">匹配成功</option>
+			<option value="2">匹配未成功</option>
+		</field>
+
+		<field
+				name="date_type"
+				type="list"
+				default="0"
+				onchange="this.form.submit();"
+		>
+			<option value="0">创建时间</option>
+			<option value="1">修改时间</option>
+		</field>
+
+		<field name="stime" type="calendar" default="2020-12-01" label="Select a date"
+			   class="input-small" required="true" filter="user_utc"
+			   description ='开始时间'
+			   showtime="false"  filltable="false" translateformat="true"
+			   onchange="this.form.submit();"
+		/>
+
+		<field name="etime" type="calendar" default="2021-01-30" label="Select a date"
+			   class="input-small" required="true" filter="user_utc"
+			   description ='结束时间'
+			   showtime="false"  filltable="false" translateformat="true"
+			   onchange="this.form.submit();"
+		/>
+
+
+
+
+		<!--<field-->
+			<!--name="http_status"-->
+			<!--type="Redirect1"-->
+			<!--label="COM_REDIRECT_FILTER_HTTP_HEADER_LABEL"-->
+			<!--description="COM_REDIRECT_FILTER_HTTP_HEADER_DESC"-->
+			<!--onchange="this.form.submit();"-->
+			<!--&gt;-->
+			<!--<option value="">COM_REDIRECT1_FILTER_SELECT_OPTION_HTTP_HEADER</option>-->
+		<!--</field>-->
+	</fields>
+	<fields name="list">
+		<field
+			name="fullordering"
+			type="list"
+			label="JGLOBAL_SORT_BY"
+			description="JGLOBAL_SORT_BY"
+			onchange="this.form.submit();"
+			default="a.inner_url ASC"
+			validate="options"
+			>
+			<option value="">JGLOBAL_SORT_BY</option>
+			<option value="a.published ASC">JSTATUS_ASC</option>
+			<option value="a.published DESC">JSTATUS_DESC</option>
+			<option value="a.inner_url ASC">当前链接升序</option>
+			<option value="a.inner_url DESC">当前链接降序</option>
+			<option value="a.target_url ASC">目标链接升序</option>
+			<option value="a.target_url DESC">目标链接降序</option>
+			<option value="a.article_alias ASC">文章别名升序</option>
+			<option value="a.article_alias DESC">文章别名降序</option>
+			<option value="a.created_date ASC">创建时间升序</option>
+			<option value="a.created_date DESC">创建时间降序</option>
+			<option value="a.modified_date ASC">修改时间升序</option>
+			<option value="a.modified_date DESC">修改时间降序</option>
+			<option value="a.keyword ASC">关键词升序</option>
+			<option value="a.keyword DESC">关键词降序</option>
+            <option value="a.new_keyword ASC">替换关键词升序</option>
+            <option value="a.new_keyword DESC">替换关键词降序</option>
+			<!--<option value="a.header ASC">COM_REDIRECT_HEADING_STATUS_CODE_ASC</option>-->
+			<!--<option value="a.header DESC">COM_REDIRECT_HEADING_STATUS_CODE_DESC</option>-->
+			<option value="a.anchor_id ASC">JGRID_HEADING_ID_ASC</option>
+			<option value="a.anchor_id DESC">JGRID_HEADING_ID_DESC</option>
+		</field>
+		<field
+			name="limit"
+			type="limitbox"
+			label="JGLOBAL_LIMIT"
+			description="JGLOBAL_LIMIT"
+			class="input-mini"
+			default="5"
+			onchange="this.form.submit();"
+		/>
+	</fields>
+</form>

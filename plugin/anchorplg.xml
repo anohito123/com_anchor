@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension version="3.9" type="plugin" group="content" method="upgrade">
+	<name>自动锚文本插件</name>
+	<author>lzr</author>
+	<creationDate>2020.12</creationDate>
+	<description>替换锚文本插件</description>
+	 <files>
+        <filename plugin="anchorplg">anchorplg.php</filename>
+    </files>
+</extension>

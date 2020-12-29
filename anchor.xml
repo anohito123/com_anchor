@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="component" version="3.9" method="upgrade">
+	<name>com_anchor</name>
+	<author>LZR</author>
+	<creationDate>Nov 2020</creationDate>
+	<authorEmail>lzr@sbd.org</authorEmail>
+	<version>0.0.1</version>
+	<description>Anchor 1228！</description>
+	<scriptfile>installation.script.php</scriptfile>
+
+		<install> <!-- Runs on install -->
+		<sql>
+			<file driver="mysql" charset="utf8">sql/install.mysql.utf8.sql</file>
+		</sql>
+	</install>
+	<uninstall> <!-- Runs on uninstall -->
+		<sql>
+			<file driver="mysql" charset="utf8">sql/uninstall.mysql.utf8.sql</file>
+		</sql>
+	</uninstall>
+	
+	<update> <!-- Runs on update; New since J2.5 -->
+		<schemas>
+			<schemapath type="mysql">sql/updates/mysql</schemapath>
+		</schemas>
+	</update>
+
+	<administration>
+		<menu link="option=com_anchor" img="class:anchor">锚文本组件</menu>
+		 <!--
+		<files folder="anchorplg">
+			<filename plugin="anchor">anchor.php</filename>
+			<filename>index.html</filename>
+		</files>
+		-->
+		<files folder="admin">
+			<filename>index.html</filename>
+			<filename>controller.php</filename>
+			<filename>anchor.php</filename>
+			
+			<folder>controllers</folder>
+			<folder>helpers</folder>
+			<folder>models</folder>
+			<folder>tables</folder>
+				<folder>sql</folder>
+			<folder>views</folder>
+		</files>
+		<languages folder="admin/language">
+			<language tag="en-GB">en-GB/en-GB.com_anchor.ini</language>
+			<language tag="en-GB">en-GB/en-GB.com_anchor.sys.ini</language>
+		</languages>
+	</administration>
+
+</extension>

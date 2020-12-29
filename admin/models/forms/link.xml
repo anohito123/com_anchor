@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+	<fieldset>
+		<field
+			name="anchor_id"
+			type="number"
+			label="JGLOBAL_FIELD_ID_LABEL"
+			id="anchor_id"
+			default="0"
+			readonly="true"
+			class="readonly"
+		 />
+
+		<field
+			name="inner_url"
+			type="text"
+			label="当前链接"
+
+			class="input-xxlarge"
+			size="50"
+			required="true" 
+		/>
+
+		<field
+			name="target_url"
+			type="text"
+			label="目标链接"
+
+			class="input-xxlarge"
+			size="50"
+			required="true" 
+		/>
+
+		<field
+			name="remark"
+			type="text"
+			label="备注"
+
+			size="40" 
+		/>
+
+		<field
+			name="published"
+			type="list"
+			label="JSTATUS"
+			description="JFIELD_PUBLISHED_DESC"
+			class="chzn-color-state"
+			size="1"
+			default="1"
+			>
+			<option value="1">JENABLED</option>
+			<option value="0">JDISABLED</option>
+			<option value="2">JARCHIVED</option>
+			<option value="-2">JTRASHED</option>
+		</field>
+
+		<field
+				name="match_state"
+				type="list"
+				label="JSTATUS2"
+				description="JFIELD_PUBLISHED_DESC"
+				class="chzn-color-state"
+				size="1"
+				default="0"
+		>
+			<option value="0">未匹配</option>
+			<option value="1">匹配成功</option>
+			<option value="2">匹配未成功</option>
+		</field>
+
+		<field
+			name="article_alias"
+			type="text"
+			label="文章别名"
+			id="article_alias"
+			size="50"
+			readonly="true" 
+		/>
+
+		<field
+			name="created_date"
+			type="text"
+			label="创建时间"
+			id="created_date"
+			class="readonly"
+			size="20"
+			readonly="true" 
+		/>
+
+		<field
+			name="modified_date"
+			type="text"
+			label="修改时间"
+			id="modified_date"
+			class="readonly"
+			size="20"
+			readonly="true" 
+		/>
+
+		<field
+			name="keyword"
+			type="text"
+			label="关键词"
+			id="keyword"
+			size="40"
+
+		/>
+		<field
+				name="new_keyword"
+				type="text"
+				label="替换关键词"
+				size="40"
+
+		/>
+		<field
+				name="match_state"
+				type="text"
+				label="替换关键词"
+				size="40"
+
+		/>
+	</fieldset>
+
+	<!--<fieldset name="advanced">-->
+		<!--<field-->
+				<!--name="header"-->
+				<!--type="redirect1"-->
+				<!--label="COM_REDIRECT_FIELD_REDIRECT_STATUS_CODE_LABEL"-->
+				<!--description="COM_REDIRECT_FIELD_REDIRECT_STATUS_CODE_DESC"-->
+				<!--default="301"-->
+				<!--class="input-xlarge"-->
+		<!--/>-->
+	<!--</fieldset>-->
+</form>
