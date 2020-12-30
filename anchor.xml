@@ -5,7 +5,7 @@
 	<creationDate>Nov 2020</creationDate>
 	<authorEmail>lzr@sbd.org</authorEmail>
 	<version>0.0.1</version>
-	<description>Anchor 1228！</description>
+	<description>Anchor！</description>
 	<scriptfile>installation.script.php</scriptfile>
 
 		<install> <!-- Runs on install -->
