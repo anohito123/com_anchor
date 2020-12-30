@@ -48,62 +48,74 @@ class PlgContentAnchorplg extends JPlugin
 			return true;
 		}
 
-		$query = $this->db->getQuery(true)->select($this->db->quoteName('keyword'))
+//  $file_path = JPATH_PLUGINS.'\content\anchorplg\tmp\\'.$row->alias.'.txt';
+// $has_unpublish = $this->check_init_state($row->alias);
+
+        $url = $this->get_efs_url($row->id,$row->catid,$row->language);
+
+		$query = $this->db->getQuery(true)
+        ->select($this->db->quoteName('keyword'))
 		->select($this->db->quoteName('new_keyword'))
 		->select($this->db->quoteName('target_url'))
-		->from($this->db->quoteName('#__anchor','t1'))
-        ->join('LEFT', $this->db->quoteName('#__content','t2') . ' ON t1.article_alias = t2.alias')
-		->where($this->db->quoteName('article_alias') . ' = ' . "'".$row->alias."'")
-        ->where($this->db->quoteName('t2.language') . ' = ' . "'".$row->language."'")
+        ->select($this->db->quoteName('match_state'))
+		->from($this->db->quoteName('#__anchor'))
+		->where($this->db->quoteName('inner_url') . ' = ' . "'".$url."'")
         ->where($this->db->quoteName('published') . ' = 1');
 		$this->db->setQuery($query);
 
-		//echo($query->__toString());exit;
+
+//echo($query->__toString());exit;
 		$arr = $this->db->loadAssocList();
+//echo "<pre>";
+//var_dump($url);exit;
 
         foreach($arr as $v){
-			
+            $content_text = $row->text;
+
 			$keyword = trim($v['keyword']);$tags = "</a>";$is_new = 0;$success = 2;
 			
 			if($v['new_keyword']!=null){
-				$row->text = str_replace(trim($v['keyword']),trim($v['new_keyword']),$row->text);
+				$row->text = str_replace(trim($v['keyword']),trim($v['new_keyword']),$content_text);
 				$keyword = trim($v['new_keyword']);
                 $is_new = 1;
 			}
 
-
-			$lst_index = strpos($row->text,$keyword);
+			$lst_index = strpos($content_text,$keyword);
 
 			$matching = false;
 
             if($lst_index){
                 //关键词被包含时跳过，并尝试继续往下匹配
-                while ($this->is_included_tags($row->text,$lst_index,strlen($keyword),$tags)){
-
-                    $lst_index = strpos($row->text,$keyword,$lst_index+strlen($keyword));
+                while ($this->is_included_tags($content_text,$lst_index,strlen($keyword),$tags)){
+                    $lst_index = strpos($content_text,$keyword,$lst_index+strlen($keyword));
                 }
                 if($lst_index)
                     $matching = true;
             }
 
-
 			if($matching){ //匹配不被包含的关键词
                 $replace_str = "<a href=".$v['target_url']." target='_blank' rel='noopener noreferrer' >".$keyword."</a>";
 
-			    if(strpos(substr($row->text,$lst_index),$keyword.$tags)){ //存在锚文本，完全匹配，进行链接替换
+//var_dump(strpos($lst_index+strlen($keyword)+4,$tags));
+//strpos(substr($row->text,$lst_index),$keyword.$tags)
+
+			    if(strpos($lst_index+strlen($keyword)+4,$tags)){ //存在锚文本，完全匹配，进行链接替换
 
 					$crt_index = $lst_index;
 					
-					while($row->text[$crt_index].$row->text[$crt_index-1]!="a<" && $crt_index!=0)
+					while($content_text[$crt_index].$content_text[$crt_index-1]!="a<" && $crt_index!=0)
 						$crt_index--;
 
-					$row->text = substr_replace($row->text,$replace_str,$crt_index-1,$lst_index-$crt_index+strlen($keyword)+5);
+					$row->text = substr_replace($content_text,$replace_str,$crt_index-1,$lst_index-$crt_index+strlen($keyword)+5);
 
                 }else{ //不存在锚文本，添加
-                    $row->text = substr_replace($row->text,$replace_str,$lst_index,strlen($keyword));
+                    $row->text = substr_replace($content_text,$replace_str,$lst_index,strlen($keyword));
+
                 }
                 $success = 1;
 			}
+//break;
+//file_put_contents($file_path,$row->text);
 
 			if($v['match_state'] == 0)
                 $this->update_result_text($row->alias,$keyword,$is_new,$success);
@@ -162,6 +174,45 @@ class PlgContentAnchorplg extends JPlugin
         }
 
         return false;
+    }
+
+    public function get_efs_url($id,$catid,$lang){
+        include_once JPATH_ROOT . '/components/com_content/helpers/route.php';
+        $url = ContentHelperRoute::getArticleRoute( $id, $catid, $lang);
+        $res = substr(juri::root(), 0, -1) . JRoute::link('site', $url);
+        return $res;
+    }
+
+    //检查发布状态
+    private function check_init_state($alias){
+
+        $query = $this->db->getQuery(true)
+            ->select($this->db->quoteName('article_alias'))
+            ->select($this->db->quoteName('match_state'))
+            ->select($this->db->quoteName('published'))
+            ->from($this->db->quoteName('#__anchor','t1'))
+            ->where($this->db->quoteName('article_alias') . ' = ' . "'".$alias."'")
+            ->where($this->db->quoteName('published') . ' = 0');
+
+        $this->db->setQuery($query);
+        //echo($query->__toString());exit;
+        $arr = $this->db->loadAssocList();
+
+        if(!empty($arr)){
+            $conditions = [
+                $this->db->quoteName('article_alias') . ' = ' . "'".$alias."'",
+                $this->db->quoteName('published') . ' = 1'
+            ];
+            $query_init = $this->db->getQuery(true)
+                ->update($this->db->quoteName('#__anchor'))
+                ->set($this->db->quoteName('match_state'). ' = 0')
+                ->where($conditions);
+            $this->db->setQuery($query_init);
+            return true;
+        }
+
+        return false;
+
     }
 
     //更新匹配状态
