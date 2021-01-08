@@ -129,7 +129,7 @@ class AnchorModelLinks extends JModelList
 	 *
 	 * @since   1.6
 	 */
-	protected function getListQuery()
+	public function getListQuery()
 	{
 		// Create a new query object.
 		$db = $this->getDbo();
@@ -171,7 +171,11 @@ class AnchorModelLinks extends JModelList
         $stime = $this->getState('filter.stime');
         $etime = $this->getState('filter.etime');
 
-        $time_field = $date_type=='0'?'created_date':'modified_date';
+        if($date_type!='0' && $stime!=null && $etime!=null){
+            $time_field = $date_type=='1'?'created_date':'modified_date';
+            $query->where($db->quoteName($time_field) . ' > ' ."'".$stime."'")
+                ->where($db->quoteName($time_field) . ' < ' ."'".$etime."'");
+        }
 
         if (!empty($search))
 		{
@@ -203,10 +207,6 @@ class AnchorModelLinks extends JModelList
 		// Add the list ordering clause.
         if($match_state!=-1 && $match_state!=null){
             $query->where($db->quoteName('match_state') . ' = ' .$match_state);
-        }
-        if($stime!=null && $etime!=null){
-            $query->where($db->quoteName($time_field) . ' > ' ."'".$stime."'")
-            ->where($db->quoteName($time_field) . ' < ' ."'".$etime."'");
         }
 
        //echo($query->__toString());exit;

@@ -66,40 +66,52 @@ class PlgContentAnchorplg extends JPlugin
 
 //echo($query->__toString());exit;
 		$arr = $this->db->loadAssocList();
-//echo "<pre>";
-//var_dump($url);exit;
 
         foreach($arr as $v){
             $content_text = $row->text;
 
 			$keyword = trim($v['keyword']);$tags = "</a>";$is_new = 0;$success = 2;
-			
+
 			if($v['new_keyword']!=null){
-				$row->text = str_replace(trim($v['keyword']),trim($v['new_keyword']),$content_text);
+
+                $content_text = substr_replace($content_text,$v['new_keyword'],stripos($content_text,$keyword),strlen($keyword));
+
 				$keyword = trim($v['new_keyword']);
                 $is_new = 1;
 			}
 
-			$lst_index = strpos($content_text,$keyword);
+
+
+			$lst_index = stripos($content_text,$keyword);
 
 			$matching = false;
 
-            if($lst_index){
+
+			$out_inside = $this->filter_inner_tags($content_text,$lst_index);
+            $out_fqa = $this->filter_other_tags($content_text,$lst_index,'<div class="g-faq"');
+            $out_recommend = $this->filter_other_tags($content_text,$lst_index,'<div class="article-recommend"');
+
+
+//var_dump($out_recommend)     ;exit;
+            if($lst_index && $out_inside  && $out_fqa && $out_recommend){
                 //关键词被包含时跳过，并尝试继续往下匹配
                 while ($this->is_included_tags($content_text,$lst_index,strlen($keyword),$tags)){
-                    $lst_index = strpos($content_text,$keyword,$lst_index+strlen($keyword));
+
+                    $lst_index = stripos($content_text,$keyword,$lst_index+strlen($keyword));
                 }
                 if($lst_index)
                     $matching = true;
             }
 
+
+
 			if($matching){ //匹配不被包含的关键词
                 $replace_str = "<a href=".$v['target_url']." target='_blank' rel='noopener noreferrer' >".$keyword."</a>";
 
-//var_dump(strpos($lst_index+strlen($keyword)+4,$tags));
-//strpos(substr($row->text,$lst_index),$keyword.$tags)
+//var_dump(stripos($lst_index+strlen($keyword)+4,$tags));
+//stripos(substr($row->text,$lst_index),$keyword.$tags)
 
-			    if(strpos($lst_index+strlen($keyword)+4,$tags)){ //存在锚文本，完全匹配，进行链接替换
+			    if(stripos($lst_index+strlen($keyword)+4,$tags)){ //存在锚文本，完全匹配，进行链接替换
 
 					$crt_index = $lst_index;
 					
@@ -109,12 +121,13 @@ class PlgContentAnchorplg extends JPlugin
 					$row->text = substr_replace($content_text,$replace_str,$crt_index-1,$lst_index-$crt_index+strlen($keyword)+5);
 
                 }else{ //不存在锚文本，添加
+                   // var_dump(substr_replace($content_text,$replace_str,$lst_index,strlen($keyword)));exit;
                     $row->text = substr_replace($content_text,$replace_str,$lst_index,strlen($keyword));
 
                 }
                 $success = 1;
 			}
-//break;
+
 //file_put_contents($file_path,$row->text);
 
 			if($v['match_state'] == 0)
@@ -132,14 +145,14 @@ class PlgContentAnchorplg extends JPlugin
 		if($this->filter_h_tags($content,$index))
 		    return true;
 
-        $a_pos = strpos($half,$tags);
+        $a_pos = stripos($half,$tags);
 
 		if($a_pos){ //判断索引的下文是否存在a标签，若不存在返回false
 
             $pro_tag = substr(str_replace('/','',$tags),0,-1);
             $next_tag = substr($content,$index+$len,abs($a_pos-$len));
 
-            if(is_numeric(strpos($next_tag,$pro_tag))) //下文包含同时包含前闭合，返回false
+            if(is_numeric(stripos($next_tag,$pro_tag))) //下文包含同时包含前闭合，返回false
                 return false;
 
             $pro_index = $index;
@@ -176,6 +189,52 @@ class PlgContentAnchorplg extends JPlugin
         return false;
     }
 
+    //过滤标签内文本
+    private function filter_inner_tags($content,$index){
+        $pro_str =substr($content,0,$index);
+
+        $pro_count = substr_count($pro_str,'<');
+        $end_count = substr_count($pro_str,'>');
+
+        return $pro_count==$end_count;
+    }
+
+
+    //过滤其他标签
+    private function filter_other_tags($content,$lst_index,$tags){
+
+        $start = stripos($content,$tags);
+       // var_dump($lst_index);var_dump($start);
+        while ($start){
+            $end = 0; $i = $start;
+            while (true){
+                $lst = $end;
+
+                $end = stripos($content,'</div>',$i);
+                $current_str = substr($content,$start,$end-$i);
+
+                $pro_count = substr_count($current_str,'<div');
+                $close_count = substr_count($current_str,'</div>');
+
+                $i = $end+1;
+                if($pro_count==$close_count) {
+                    break;
+                }
+            }
+
+            if($lst_index>$start && $lst_index<$lst){
+                return false;
+            }else{
+                return true;
+            }
+            $start =  stripos($content,$tags,$end);
+        }
+
+
+        return true;
+    }
+
+    //获取连接
     public function get_efs_url($id,$catid,$lang){
         include_once JPATH_ROOT . '/components/com_content/helpers/route.php';
         $url = ContentHelperRoute::getArticleRoute( $id, $catid, $lang);

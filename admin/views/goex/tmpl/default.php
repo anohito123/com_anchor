@@ -36,7 +36,13 @@ defined('_JEXEC') or die('Restricted access');
             </div>
 
 
-                <div style="padding-top:5px">提示：支持xlsx，xls，xla格式文件</div>
+                <div style="padding-top:5px">
+                    <ul>
+                        <li>支持xlsx，xls，xla格式文件</li>
+                        <li>导入文件名以“anchor_exdata”开头的Excel文件,会根据id执行更新操作</li>
+                    </ul>
+                </div>
+
                 <div class="controls" style="padding-top:10px">
 
                     <button type="submit" name="task" id="import" value="links.import">导入Excel</button>

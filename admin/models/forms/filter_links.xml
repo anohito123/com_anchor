@@ -41,8 +41,9 @@
 				default="0"
 				onchange="this.form.submit();"
 		>
-			<option value="0">创建时间</option>
-			<option value="1">修改时间</option>
+			<option value="0">-选择时间(全部)-</option>
+			<option value="1">创建时间</option>
+			<option value="2">修改时间</option>
 		</field>
 
 		<field name="stime" type="calendar" default="2020-12-01" label="Select a date"

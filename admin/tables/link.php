@@ -39,6 +39,7 @@ class AnchorTableLink extends JTable
 	{
 		$this->inner_url = trim(rawurldecode($this->inner_url));
 		$this->target_url = trim(rawurldecode($this->target_url));
+        $this->keyword = trim($this->keyword);
         $match = "/^(https?):\/\/[\w\-]+(\.[\w\-]+)+([\w\-\.,@?^=%&:\/~\+#]*[\w\-\@?^=%&\/~\+#])?$/";
 
          $alias = substr($this->inner_url,strripos($this->inner_url,'/')+1);

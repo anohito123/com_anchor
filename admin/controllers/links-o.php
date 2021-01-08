@@ -10,10 +10,6 @@
 defined('_JEXEC') or die;
 
 use Joomla\Utilities\ArrayHelper;
-use Joomla\CMS\Date\Date;
-use Joomla\CMS\Language\Text;
-use Joomla\CMS\Factory;
-
 require 'Classes/PHPExcel.php';
 /**
  * Redirect link list controller class.
@@ -59,6 +55,9 @@ class AnchorControllerLinks extends JControllerAdmin
 
        // echo($query->__toString());exit;
         $arr =  $alias = $arr_cnt = [];
+
+
+
 
         if($input!=null){
             $db->setQuery($query);
@@ -113,84 +112,12 @@ class AnchorControllerLinks extends JControllerAdmin
         return $res;
     }
 
-    public function export(){
-        include_once JPATH_COMPONENT . '/models/links.php';
-        $db = JFactory::getDbo();
-        $lk = new AnchorModelLinks();
-        $query = $lk->getListQuery();
-
-
-        $db->setQuery($query);
-        $arr = $db->loadAssocList();
-
-
-        $arrHeader = array('anchor_id', 'keyword', 'new_keyword', 'target_url');
-        $this->exportEx($arr,$arrHeader);
-
-    }
-
-    //导出excel
-    public function exportEx($xlsData,$arrHeader)
-    {
-
-        $objExcel = new \PHPExcel();
-        //设置文档属性
-        $objWriter = \PHPExcel_IOFactory::createWriter($objExcel, 'Excel2007');
-        //设置内容
-        $objActSheet = $objExcel->getActiveSheet();
-        $key = ord("A");
-        $letter = explode(',', "A,B,C,D");
-        //填充表头信息
-        $lenth = count($arrHeader);
-        for ($i = 0; $i < $lenth; $i++) {
-            $objActSheet->setCellValue("$letter[$i]1", "$arrHeader[$i]");
-        };
-        //填充表格信息
-        foreach ($xlsData as $k => $v) {
-            $k+=2;
-
-            //表格内容
-            $objActSheet->setCellValue('A' . $k, $v['anchor_id']);
-           // $objActSheet->setCellValue('B' . $k, $v['inner_url']);
-            $objActSheet->setCellValue('B' . $k, $v['keyword']);
-            $objActSheet->setCellValue('C' . $k, $v['new_keyword']);
-            $objActSheet->setCellValue('D' . $k, $v['target_url']);
-           // $objActSheet->setCellValue('F' . $k, $v['published']);
-           // $objActSheet->setCellValue('G' . $k, $v['match_state']);
-            //$objActSheet->setCellValue('H' . $k, $v['created_date']);
-           // $objActSheet->setCellValue('I' . $k, $v['modified_date']);
-          //  $objActSheet->setCellValue('E' . $k, $v['remark']);
-
-            // 表格高度
-            $objActSheet->getRowDimension($k)->setRowHeight(20);
-        }
-
-        $width = array(20, 20, 15, 10, 10, 30, 10, 15);
-        //设置表格的宽度
-        $objActSheet->getColumnDimension('A')->setWidth($width[5]);
-        $objActSheet->getColumnDimension('B')->setWidth($width[1]);
-        $objActSheet->getColumnDimension('C')->setWidth($width[0]);
-        $objActSheet->getColumnDimension('D')->setWidth($width[5]);
-        $objActSheet->getColumnDimension('E')->setWidth($width[5]);
-
-        $outfile = "anchor_exdata" . time() . ".xlsx";
-        ob_end_clean();
-        header("Content-Type: application/force-download");
-        header("Content-Type: application/octet-stream");
-        header("Content-Type: application/download");
-        header('Content-Disposition:inline;filename="' . $outfile . '"');
-        header("Content-Transfer-Encoding: binary");
-        header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
-        header("Pragma: no-cache");
-        $objWriter->save('php://output');
-    }
-
-    public function import() {
+	public function import() {
 		$this->checkToken();
 
 		$file = JFactory::getApplication()->input->files->get('importfile');
 		jimport('joomla.filesystem.file');
-        libxml_disable_entity_loader(false);
+		
 		if ($file["error"] > 0){
 			echo "上传失败";
 			return;
@@ -200,10 +127,7 @@ class AnchorControllerLinks extends JControllerAdmin
 		
 		$temp = explode(".", $name);
 		$extension = end($temp);
-//var_dump(strpos($name,'anchor_exdata'));exit;
-
-		;
-
+	
 		$file_url = $file["tmp_name"];
 		
 		if(!in_array($extension,$allowedExts)){
@@ -215,8 +139,6 @@ class AnchorControllerLinks extends JControllerAdmin
 			return;
 		}
 
-        $is_ex = strpos($name,'anchor_exdata');
-
 	$rmk = trim(JRequest::getVar('remark'));
 
     $create_file =     JPATH_COMPONENT . '/' . "tmp" . '/' .$name.time().'.txt';
@@ -227,8 +149,6 @@ class AnchorControllerLinks extends JControllerAdmin
     $reader = PHPExcel_IOFactory::createReader('Excel5');
     $excel = PHPExcel_IOFactory::load($file_url);
 
-
-
     $SheetNamas = $excel->getSheetNames();
     $excel->setActiveSheetIndexByName($SheetNamas[0]);
     $curSheet = $excel->getActiveSheet();
@@ -236,18 +156,11 @@ class AnchorControllerLinks extends JControllerAdmin
 
 	$db = JFactory::getDbo();
 	$query = $db->getQuery(true);
-
+	$columns = ['article_alias','keyword','new_keyword','inner_url','target_url','published','remark'];
 	$match = "/^(https?):\/\/[\w\-]+(\.[\w\-]+)+([\w\-\.,@?^=%&:\/~\+#]*[\w\-\@?^=%&\/~\+#])?$/";
 	JLoader::register('AnchorHelper', JPATH_ADMINISTRATOR . '/components/com_anchor/helpers/anchor.php');
 	$check_arr = AnchorHelper::get_anchor_arr();
-       $ids = $columns = $values = $mis_matchs = [];
-
-        $date = new Date(date("Y-m-d H:i:s"));
-        $timezone = Factory::getUser()->getTimezone();
-        $date->setTimezone($timezone);
-        $mdate =  $date->format(Text::_('DATE_FORMAT_FILTER_DATETIME'));
-
-      //  var_dump($mdate);exit;
+	$values = $mis_matchs = [];
 	for($k = 2; $k <= $rows; $k++){
 		$value_a = $curSheet->getCell('A'.$k)->getValue();
 		$value_b = $curSheet->getCell('B'.$k)->getValue();
@@ -255,66 +168,32 @@ class AnchorControllerLinks extends JControllerAdmin
 		$value_d = $curSheet->getCell('D'.$k)->getValue();
 
 
-		if($is_ex===0){
-            $columns = ['anchor_id','inner_url','keyword','new_keyword','target_url','published','match_state','created_date','modified_date','remark'];
-            $ids[] = $value_a;
-            $values[$value_a] = "'".$value_a."','inner_url','".$value_b."','".$value_c."','".$value_d."','1','0','".'created_date'."','".$mdate."','".$rmk."'";
+        $three_keys = ['inner_url'=>$value_a,'keyword'=>$value_b,'target_url'=>$value_d];
+        if(!preg_match($match,$value_a) || !preg_match($match,$value_d) || in_array($three_keys,$check_arr) ){
+			$mis_matchs[] = '[line]: '.$k.' [inner_url]: '.$value_a.' [keyword]: '.$value_b.' [new_keyword]: '.$value_c.' [target_url]: '.$value_d;
+			continue;
+		}
+		
+		$alisa = substr($value_a,strripos($value_a,'/')+1);
+		$arr = [$alisa,$value_b,$value_c,$value_a,$value_d];
+		$res = $this->changequote($arr);
 
-        }else{
-            $columns = ['article_alias','keyword','new_keyword','inner_url','target_url','published','remark'];
-            $three_keys = ['inner_url'=>$value_a,'keyword'=>$value_b,'target_url'=>$value_d];
-            if(!preg_match($match,$value_a) || !preg_match($match,$value_d) || in_array($three_keys,$check_arr) ){
-                $mis_matchs[] = '[line]: '.$k.' [inner_url]: '.$value_a.' [keyword]: '.$value_b.' [new_keyword]: '.$value_c.' [target_url]: '.$value_d;
-                continue;
-            }
-
-            $alisa = substr($value_a,strripos($value_a,'/')+1);
-            $arr = [$alisa,$value_b,$value_c,$value_a,$value_d];
-            $res = $this->changequote($arr);
-
-            if(substr($res[0],-5)=='.html'){
-                $res[0] = substr($res[0],0,-5);
-            }
-
-            $values[] = "'".$res[0]."','".$res[1]."','".$res[2]."','".$res[3]."','".$res[4]."','1',"."'".$rmk."'";
-        }
+		
+		 if(substr($res[0],-5)=='.html'){
+			 $res[0] = substr($res[0],0,-5);
+		 }	
+		
+		$values[] = "'".$res[0]."','".$res[1]."','".$res[2]."','".$res[3]."','".$res[4]."','1',"."'".$rmk."'";
 	}
-//echo '<pre>';
 
-    if($values!=null && $is_ex!==0){
+    if($values!=null){
         $query->insert($db->quoteName('#__anchor'));
         $query->columns($columns);
         $query->values($values);
         $db->setQuery($query);
+        //echo($query->__toString());exit;
         $db->execute();
     }
-
-    if($is_ex===0){
-	    $ids = implode(',',$ids);
-	    $query_a = $db->getQuery(true)
-            ->select($db->quoteName('anchor_id'))
-            ->select($db->quoteName('inner_url'))
-            ->select($db->quoteName('created_date'))
-            ->from($db->quoteName('#__anchor'))
-            ->where($db->quoteName('anchor_id') .' in ('.$ids.')');
-        $db->setQuery($query_a);
-       // echo($query_a->__toString());exit;
-        $a_arr = $db->loadAssocList();
-
-        foreach ($a_arr as $v){
-            $values[$v['anchor_id']] = str_replace('inner_url',$v['inner_url'],$values[$v['anchor_id']]);
-            $values[$v['anchor_id']] = str_replace('created_date',$v['created_date'],$values[$v['anchor_id']]);
-        }
-
-        $query->delete($db->quoteName('#__anchor'))->where($db->quoteName('anchor_id').' in ('.$ids.')');
-        $db->setQuery($query);
-        $db->execute();
-        $query_i = $db->getQuery(true)->insert($db->quoteName('#__anchor'))->columns($columns)->values($values);
-        $db->setQuery($query_i);
-        //echo($query_i->__toString());exit;
-        $db->execute();
-    }
-
 
 	if($mis_matchs!=null){
 		echo "<h3>以下记录未导入成功，原因如下。请检查后重新导入</h3>

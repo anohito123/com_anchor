@@ -172,8 +172,12 @@ class AnchorViewLinks extends JViewLegacy
 			JToolbarHelper::divider();
 		}
 			//$bar->appendButton('Link', 'checkin', '导入EX',  JRoute::_('index.php?option=com_redirect1&view=goex'), false);
-			$bar->appendButton('Popup', 'checkin', '导入Excel',  'index.php?option=com_anchor&view=goex&tmpl=component');
+		$bar->appendButton('Popup', 'upload', '导入Excel',  'index.php?option=com_anchor&view=goex&tmpl=component');
+        $bar->appendButton('Link', 'download', '导出Excel','index.php?option=com_anchor&task=links.export');
         $bar->appendButton('Popup', 'search', '搜索锚文本关键词',  'index.php?option=com_anchor&view=search&tmpl=component');
+
+
+       // JToolBarHelper::title('导出Excel', 'checkin');
 
 	}
 }

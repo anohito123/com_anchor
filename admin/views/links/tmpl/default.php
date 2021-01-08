@@ -127,12 +127,8 @@ $listDirn  = $this->escape($this->state->get('list.direction'));
 						<td class="break-word">
                             <a href="<?php echo JRoute::_('index.php?option=com_anchor&task=link.edit&anchor_id=' . $item->anchor_id); ?>" title="<?php echo $this->escape($item->inner_url); ?>">
                                 <?php echo $this->escape(str_replace(JUri::root(), '', rawurldecode($item->inner_url))); ?></a>
-<!--							--><?php //if ($canEdit) : ?>
-<!--								<a href="--><?php //echo JRoute::_('index.php?option=com_anchor&task=link.edit&anchor_id=' . $item->anchor_id); ?><!--" title="--><?php //echo $this->escape($item->inner_url); ?><!--">-->
-<!--									--><?php //echo $this->escape(str_replace(JUri::root(), '', rawurldecode($item->inner_url))); ?><!--</a>-->
-<!--							--><?php //else : ?>
-<!--									--><?php //echo $this->escape(str_replace(JUri::root(), '', rawurldecode($item->inner_url))); ?>
-<!--							--><?php //endif; ?>
+
+                            <a href="<?php echo $this->escape($item->inner_url); ?>" target="_blank" ><span class="icon-out-2 small"></span></a>
 						</td>
                         <td class="hidden-phone">
                             <?php echo  $item->keyword; ?>
