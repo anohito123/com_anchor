@@ -32,7 +32,7 @@
 			<option value="-1">-匹配状态(全部)-</option>
 			<option value="0">未匹配</option>
 			<option value="1">匹配成功</option>
-			<option value="2">匹配未成功</option>
+			<option value="2">匹配失败</option>
 		</field>
 
 		<field

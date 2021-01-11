@@ -164,7 +164,6 @@ class AnchorControllerLinks extends JControllerAdmin
             // 表格高度
             $objActSheet->getRowDimension($k)->setRowHeight(20);
         }
-
         $width = array(20, 20, 15, 10, 10, 30, 10, 15);
         //设置表格的宽度
         $objActSheet->getColumnDimension('A')->setWidth($width[5]);
@@ -172,7 +171,6 @@ class AnchorControllerLinks extends JControllerAdmin
         $objActSheet->getColumnDimension('C')->setWidth($width[0]);
         $objActSheet->getColumnDimension('D')->setWidth($width[5]);
         $objActSheet->getColumnDimension('E')->setWidth($width[5]);
-
         $outfile = "anchor_exdata" . time() . ".xlsx";
         ob_end_clean();
         header("Content-Type: application/force-download");
@@ -182,7 +180,10 @@ class AnchorControllerLinks extends JControllerAdmin
         header("Content-Transfer-Encoding: binary");
         header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
         header("Pragma: no-cache");
+
         $objWriter->save('php://output');
+        exit;
+
     }
 
     public function import() {

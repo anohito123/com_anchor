@@ -147,7 +147,7 @@ $listDirn  = $this->escape($this->state->get('list.direction'));
                                 if($item->match_state==1){
                                     echo '匹配成功';
                                 }elseif($item->match_state==2){
-                                    echo '匹配未成功';
+                                    echo '匹配失败';
                                 }else{
                                     echo '未匹配';
                                 }

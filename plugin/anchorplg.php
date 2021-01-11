@@ -80,20 +80,17 @@ class PlgContentAnchorplg extends JPlugin
                 $is_new = 1;
 			}
 
-
-
 			$lst_index = stripos($content_text,$keyword);
 
 			$matching = false;
 
-
 			$out_inside = $this->filter_inner_tags($content_text,$lst_index);
             $out_fqa = $this->filter_other_tags($content_text,$lst_index,'<div class="g-faq"');
             $out_recommend = $this->filter_other_tags($content_text,$lst_index,'<div class="article-recommend"');
-
+            $out_other_chars = $this->filter_other_chars($content_text,$lst_index,strlen($keyword));
 
 //var_dump($out_recommend)     ;exit;
-            if($lst_index && $out_inside  && $out_fqa && $out_recommend){
+            if($lst_index && $out_inside  && $out_fqa && $out_recommend && $out_other_chars){
                 //关键词被包含时跳过，并尝试继续往下匹配
                 while ($this->is_included_tags($content_text,$lst_index,strlen($keyword),$tags)){
 
@@ -170,6 +167,21 @@ class PlgContentAnchorplg extends JPlugin
 		}
 	}
 
+	//匹配首尾特殊字符
+    private function filter_other_chars($content,$index,$len){
+	    $pro_char = $content[$index-1];
+	    $end_char = $content[$index+$len];
+
+	    $is_en_dash = $pro_char=='-' || $end_char=='-';
+        $pro_char_is_letter = $pro_char>'a' && $pro_char<'z' || $pro_char>'A' && $pro_char<'Z';
+        $end_char_is_letter = $end_char>'a' && $end_char<'z' || $end_char>'A' && $end_char<'Z';
+
+	    if($is_en_dash || $pro_char_is_letter || $end_char_is_letter)
+	        return false;
+        return true;
+
+    }
+
 	//过滤h标签
     private function filter_h_tags($content,$index){
 
@@ -188,6 +200,7 @@ class PlgContentAnchorplg extends JPlugin
 
         return false;
     }
+
 
     //过滤标签内文本
     private function filter_inner_tags($content,$index){
@@ -229,7 +242,6 @@ class PlgContentAnchorplg extends JPlugin
             }
             $start =  stripos($content,$tags,$end);
         }
-
 
         return true;
     }
