@@ -82,25 +82,25 @@ class PlgContentAnchorplg extends JPlugin
 
 			$lst_index = stripos($content_text,$keyword);
 
+			$is_find = is_numeric($lst_index);
+
 			$matching = false;
 
-			$out_inside = $this->filter_inner_tags($content_text,$lst_index);
-            $out_fqa = $this->filter_other_tags($content_text,$lst_index,'<div class="g-faq"');
-            $out_recommend = $this->filter_other_tags($content_text,$lst_index,'<div class="article-recommend"');
-            $out_other_chars = $this->filter_other_chars($content_text,$lst_index,strlen($keyword));
+            if($is_find){
 
-//var_dump($out_recommend)     ;exit;
-            if($lst_index && $out_inside  && $out_fqa && $out_recommend && $out_other_chars){
-                //关键词被包含时跳过，并尝试继续往下匹配
-                while ($this->is_included_tags($content_text,$lst_index,strlen($keyword),$tags)){
+                $is_pass = $this->condition_filter($content_text,$lst_index,$keyword,$tags);
+
+                //关键词不符合条件时跳过，并尝试继续往下匹配
+                while (!$is_pass){
 
                     $lst_index = stripos($content_text,$keyword,$lst_index+strlen($keyword));
+                    if(!is_numeric($lst_index)) break;
+                    $is_pass = $this->condition_filter($content_text,$lst_index,$keyword,$tags);
+
                 }
-                if($lst_index)
-                    $matching = true;
+
+                if(is_numeric($lst_index)) $matching = true;
             }
-
-
 
 			if($matching){ //匹配不被包含的关键词
                 $replace_str = "<a href=".$v['target_url']." target='_blank' rel='noopener noreferrer' >".$keyword."</a>";
@@ -127,20 +127,33 @@ class PlgContentAnchorplg extends JPlugin
 
 //file_put_contents($file_path,$row->text);
 
+           
 			if($v['match_state'] == 0)
                 $this->update_result_text($row->alias,$keyword,$is_new,$success);
 
 		}
 
 	}
-	
+
+	//过滤器
+    private function condition_filter($content_text,$lst_index,$keyword,$tags){
+
+        $out_inside = $this->filter_inner_tags($content_text,$lst_index);
+        $out_fqa = $this->filter_other_tags($content_text,$lst_index,'<div class="g-faq"');
+        $out_recommend = $this->filter_other_tags($content_text,$lst_index,'<div class="article-recommend"');
+        $out_other_chars = $this->filter_other_chars($content_text,$lst_index,strlen($keyword));
+        $out_tags = $this->is_included_tags($content_text,$lst_index,strlen($keyword),$tags);
+        $is_pass = $out_inside && $out_fqa && $out_recommend && $out_other_chars && $out_tags;
+        return $is_pass;
+    }
+
 	//返回字符串索引是否被指定标签包含
 	private function is_included_tags($content,$index,$len,$tags){
 
 		$half = substr($content,$index);
 
 		if($this->filter_h_tags($content,$index))
-		    return true;
+		    return false;
 
         $a_pos = stripos($half,$tags);
 
@@ -149,21 +162,21 @@ class PlgContentAnchorplg extends JPlugin
             $pro_tag = substr(str_replace('/','',$tags),0,-1);
             $next_tag = substr($content,$index+$len,abs($a_pos-$len));
 
-            if(is_numeric(stripos($next_tag,$pro_tag))) //下文包含同时包含前闭合，返回false
-                return false;
+            if(is_numeric(stripos($next_tag,$pro_tag))) //下文包含同时包含前闭合，返回true
+                return true;
 
             $pro_index = $index;
             while (substr($content,$pro_index,2)!=$pro_tag){
                 $pro_index--;
-                if($pro_index==0) //判断上文是否有前闭合，若没有则返回ture （跳过）
-                    return true;
+                if($pro_index==0) //判断上文是否有前闭合，若没有则返回false （跳过）
+                    return false;
             }
-            //已经存在a标签且前闭合的情况：若a标签索引与关键词索引相等且关键词有后闭合则返回false，否则返回true
+            //已经存在a标签且前闭合的情况：若a标签索引与关键词索引相等且关键词有后闭合则返回true，否则返回false
             if($a_pos+$index==$len+$index && $content[$index-1]==">")
-                return false;
-            return true;
+                return true;
+            return false;
 		}else{
-			return false;
+			return true;
 		}
 	}
 
@@ -173,8 +186,8 @@ class PlgContentAnchorplg extends JPlugin
 	    $end_char = $content[$index+$len];
 
 	    $is_en_dash = $pro_char=='-' || $end_char=='-';
-        $pro_char_is_letter = $pro_char>'a' && $pro_char<'z' || $pro_char>'A' && $pro_char<'Z';
-        $end_char_is_letter = $end_char>'a' && $end_char<'z' || $end_char>'A' && $end_char<'Z';
+        $pro_char_is_letter = $pro_char>='a' && $pro_char<='z' || $pro_char>='A' && $pro_char<='Z';
+        $end_char_is_letter = $end_char>='a' && $end_char<='z' || $end_char>='A' && $end_char<='Z';
 
 	    if($is_en_dash || $pro_char_is_letter || $end_char_is_letter)
 	        return false;
